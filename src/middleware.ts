@@ -9,20 +9,22 @@ export function middleware(request: NextRequest) {
  let isAuthenticated = false
 
  if (authCookie) {
-   try {
-     const authData = JSON.parse(authCookie)
-     
-     if (authData.isConnected && 
-         authData.orgData?.token && 
-         authData.tokenExpiry) {
-       
-       const isExpired = new Date() >= new Date(authData.tokenExpiry)
-       isAuthenticated = !isExpired
-     }
-   } catch {
-     isAuthenticated = false
-   }
- }
+  try {
+    const decodedCookie = decodeURIComponent(authCookie)
+    const authData = JSON.parse(decodedCookie)
+    
+    if (authData.isConnected && 
+        authData.orgData?.token && 
+        authData.tokenExpiry) {
+      
+      const isExpired = new Date() >= new Date(authData.tokenExpiry)
+      isAuthenticated = !isExpired
+    }
+  } catch (error) {
+    console.error('Cookie parsing error:', error)
+    isAuthenticated = false
+  }
+}
 
  const protectedRoutes = ['/dashboard', '/settings']
  const protectedApiRoutes = ['/api/action-required']
@@ -62,7 +64,6 @@ export function middleware(request: NextRequest) {
    )
  }
 
- // Allow auth routes and public routes to pass through
  if (isAuthRoute || isPublicRoute) {
    return NextResponse.next()
  }
