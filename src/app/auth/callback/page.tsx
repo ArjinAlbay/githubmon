@@ -25,12 +25,17 @@ export default function AuthCallback() {
     
     console.log('Auth callback - status:', status)
     console.log('Auth callback - session:', session)
-    
+
     if (status === 'unauthenticated') {
       console.log('Not authenticated, redirecting to login')
       router.replace('/login?error=authentication_failed')
       return
     }
+
+    if (!session) {
+    console.log('No session found, waiting...')
+    return
+  }
     
     if (status === 'authenticated' && session) {
       const extendedSession = session as ExtendedSession
