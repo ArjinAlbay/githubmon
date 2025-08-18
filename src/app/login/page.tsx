@@ -34,6 +34,8 @@ function LoginContent() {
                 <p className="text-sm text-destructive">
                   {error === 'authentication_failed' 
                     ? 'Authentication failed. Please try again.' 
+                    : error === 'missing_token'
+                    ? 'GitHub authentication succeeded but access token was not received. Please try again.'
                     : 'An error occurred during sign in. Please try again.'}
                 </p>
               </div>

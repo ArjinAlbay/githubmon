@@ -82,12 +82,20 @@ const authOptions = {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
    async session({ session, token }: any) {
+      if (token.accessToken) {
+        session.accessToken = token.accessToken
+      }
       if (token.login && session.user) {
         session.user.login = token.login 
       }
       return session
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      // Always redirect to auth callback page after OAuth to handle state
+      if (url.includes('/api/auth/callback/github')) {
+        return `${baseUrl}/auth/callback`
+      }
+      
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`
       }
@@ -98,7 +106,7 @@ const authOptions = {
       } catch {
         
       }
-      return baseUrl
+      return `${baseUrl}/auth/callback`
     }
   }
 }

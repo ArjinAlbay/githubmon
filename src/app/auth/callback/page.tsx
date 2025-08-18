@@ -24,9 +24,13 @@ export default function AuthCallback() {
 useEffect(() => {
  if (status === 'loading') return
  
+ console.log('Auth callback - status:', status)
+ console.log('Auth callback - session:', session)
+ 
  const extendedSession = session as ExtendedSession
  
  if (status === 'authenticated' && extendedSession?.accessToken && extendedSession.user) {
+   console.log('Setting up authenticated user...')
    const expiryDate = new Date()
    expiryDate.setDate(expiryDate.getDate() + 30)
    
@@ -46,7 +50,11 @@ useEffect(() => {
    setTimeout(() => {
      router.replace('/dashboard')
    }, 500)
+ } else if (status === 'authenticated' && !extendedSession?.accessToken) {
+   console.error('Authenticated but missing access token')
+   router.replace('/login?error=missing_token')
  } else if (status === 'unauthenticated') {
+   console.log('Not authenticated, redirecting to login')
    // If not authenticated, redirect to login with error
    router.replace('/login?error=authentication_failed')
  }
