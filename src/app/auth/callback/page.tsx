@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores'
 
-// Type assertion for extended session
 interface ExtendedSession {
   accessToken?: string
   user?: {
@@ -21,44 +20,58 @@ export default function AuthCallback() {
   const router = useRouter()
   const { setOrgData, setConnected, setTokenExpiry } = useAuthStore()
 
-useEffect(() => {
- if (status === 'loading') return
- 
- console.log('Auth callback - status:', status)
- console.log('Auth callback - session:', session)
- 
- const extendedSession = session as ExtendedSession
- 
- if (status === 'authenticated' && extendedSession?.accessToken && extendedSession.user) {
-   console.log('Setting up authenticated user...')
-   const expiryDate = new Date()
-   expiryDate.setDate(expiryDate.getDate() + 30)
-   
-   // GitHub username'i öncelikle login field'ından al
-   const githubUsername = extendedSession.user.login || 'Unknown'
-   const displayName = extendedSession.user.name || extendedSession.user.login || 'Unknown'
-   
-   setOrgData({
-     orgName: displayName,
-     username: githubUsername,
-     token: extendedSession.accessToken
-   })
-   setTokenExpiry(expiryDate.toISOString())
-   setConnected(true)
-   
-   // Wait a moment for state to update, then redirect
-   setTimeout(() => {
-     router.replace('/dashboard')
-   }, 500)
- } else if (status === 'authenticated' && !extendedSession?.accessToken) {
-   console.error('Authenticated but missing access token')
-   router.replace('/login?error=missing_token')
- } else if (status === 'unauthenticated') {
-   console.log('Not authenticated, redirecting to login')
-   // If not authenticated, redirect to login with error
-   router.replace('/login?error=authentication_failed')
- }
-}, [session, status, router, setOrgData, setConnected, setTokenExpiry])
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    console.log('Auth callback - status:', status)
+    console.log('Auth callback - session:', session)
+    
+    if (status === 'unauthenticated') {
+      console.log('Not authenticated, redirecting to login')
+      router.replace('/login?error=authentication_failed')
+      return
+    }
+    
+    if (status === 'authenticated' && session) {
+      const extendedSession = session as ExtendedSession
+      
+      if (extendedSession?.accessToken && extendedSession.user) {
+        console.log('Setting up authenticated user...')
+        const expiryDate = new Date()
+        expiryDate.setDate(expiryDate.getDate() + 30)
+        
+        const githubUsername = extendedSession.user.login || 'Unknown'
+        const displayName = extendedSession.user.name || extendedSession.user.login || 'Unknown'
+        
+        setOrgData({
+          orgName: displayName,
+          username: githubUsername,
+          token: extendedSession.accessToken
+        })
+        setTokenExpiry(expiryDate.toISOString())
+        setConnected(true)
+        
+        const cookieValue = JSON.stringify({
+          isConnected: true,
+          orgData: {
+            orgName: displayName,
+            username: githubUsername,
+            token: extendedSession.accessToken
+          },
+          tokenExpiry: expiryDate.toISOString()
+        })
+        
+        document.cookie = `githubmon-auth=${encodeURIComponent(cookieValue)}; path=/; max-age=${30 * 24 * 60 * 60}; samesite=lax`
+        
+        setTimeout(() => {
+          router.replace('/dashboard')
+        }, 500)
+      } else {
+        console.error('Authenticated but missing access token')
+        router.replace('/login?error=missing_token')
+      }
+    }
+  }, [session, status, router, setOrgData, setConnected, setTokenExpiry])
 
   return (
     <div className="h-screen bg-background flex items-center justify-center">
@@ -71,4 +84,3 @@ useEffect(() => {
     </div>
   )
 }
-
