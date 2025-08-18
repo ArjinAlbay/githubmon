@@ -39,6 +39,17 @@ if (
 
 const authOptions = {
   secret: NEXTAUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true
+      }
+    }
+  },
   providers: [
     GitHubProvider({
       clientId: GITHUB_CLIENT_ID!,
