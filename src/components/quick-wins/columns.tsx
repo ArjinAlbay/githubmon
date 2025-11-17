@@ -2,13 +2,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ExternalLink, Calendar, ListPlus, UserPlus, Loader2 } from "lucide-react";
+import { ExternalLink, Calendar, ListPlus } from "lucide-react";
 import type { GitHubIssue } from "@/types/quickWins";
 
 interface CreateColumnsOptions {
   onAddToKanban?: (issue: GitHubIssue) => void;
-  onAssignToMe?: (issue: GitHubIssue) => void;
-  assigningIssueId?: number | null;
 }
 
 export const createColumns = (options?: CreateColumnsOptions): ColumnDef<GitHubIssue>[] => [
@@ -168,42 +166,17 @@ export const createColumns = (options?: CreateColumnsOptions): ColumnDef<GitHubI
     header: "Actions",
     cell: ({ row }) => {
       const issue = row.original;
-      const isAssigned = issue.assignee !== null && issue.assignee !== undefined;
-      const isAssigning = options?.assigningIssueId === issue.id;
-
       return (
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => options?.onAddToKanban?.(issue)}
-            disabled={!options?.onAddToKanban}
-            className="gap-1"
-          >
-            <ListPlus className="w-4 h-4" />
-            Add to Kanban
-          </Button>
-          <Button
-            size="sm"
-            variant={isAssigned ? "secondary" : "default"}
-            onClick={() => options?.onAssignToMe?.(issue)}
-            disabled={!options?.onAssignToMe || isAssigned || isAssigning}
-            className="gap-1"
-            title={isAssigned ? "Already assigned" : "Assign to me"}
-          >
-            {isAssigning ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Assigning...
-              </>
-            ) : (
-              <>
-                <UserPlus className="w-4 h-4" />
-                {isAssigned ? "Assigned" : "Assign to Me"}
-              </>
-            )}
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => options?.onAddToKanban?.(issue)}
+          disabled={!options?.onAddToKanban}
+          className="gap-1"
+        >
+          <ListPlus className="w-4 h-4" />
+          Add to Kanban
+        </Button>
       );
     },
     enableSorting: false,
