@@ -41,11 +41,14 @@ import {
   Filter,
   RefreshCw,
   AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 import { createColumns } from "./columns";
 import type { GitHubIssue } from "@/types/quickWins";
 import { useKanbanStore } from "@/stores/kanban";
+import { githubAPIClient } from "@/lib/api/github-api-client";
+import { useAuthStore } from "@/stores/auth";
 
 interface QuickWinsTableProps {
   data: GitHubIssue[];
@@ -70,8 +73,12 @@ export function QuickWinsTable({
   const [globalFilter, setGlobalFilter] = useState("");
 
   const [languageFilter, setLanguageFilter] = useState<string>("all");
+  const [assigningIssueId, setAssigningIssueId] = useState<number | null>(null);
+  const [assignmentSuccess, setAssignmentSuccess] = useState<number | null>(null);
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
 
   const addTask = useKanbanStore((state) => state.addTask);
+  const orgData = useAuthStore((state) => state.orgData);
 
   const handleAddToKanban = useCallback((issue: GitHubIssue) => {
     addTask({
@@ -85,7 +92,46 @@ export function QuickWinsTable({
     });
   }, [addTask]);
 
-  const columns = useMemo(() => createColumns({ onAddToKanban: handleAddToKanban }), [handleAddToKanban]);
+  const handleAssignToMe = useCallback(async (issue: GitHubIssue) => {
+    if (!orgData?.token) {
+      setAssignmentError("You must be logged in to assign issues");
+      setTimeout(() => setAssignmentError(null), 3000);
+      return;
+    }
+
+    const urlParts = issue.url.match(/github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/);
+    if (!urlParts) {
+      setAssignmentError("Invalid issue URL format");
+      setTimeout(() => setAssignmentError(null), 3000);
+      return;
+    }
+
+    const [, owner, repo, issueNumber] = urlParts;
+
+    setAssigningIssueId(issue.id);
+    setAssignmentError(null);
+
+    githubAPIClient.setUserToken(orgData.token);
+
+    const result = await githubAPIClient.assignIssueToMe(owner, repo, parseInt(issueNumber));
+
+    setAssigningIssueId(null);
+
+    if (result.success) {
+      setAssignmentSuccess(issue.id);
+      setTimeout(() => setAssignmentSuccess(null), 3000);
+      onRefresh();
+    } else {
+      setAssignmentError(result.error || "Failed to assign issue");
+      setTimeout(() => setAssignmentError(null), 3000);
+    }
+  }, [orgData, onRefresh]);
+
+  const columns = useMemo(() => createColumns({
+    onAddToKanban: handleAddToKanban,
+    onAssignToMe: handleAssignToMe,
+    assigningIssueId,
+  }), [handleAddToKanban, handleAssignToMe, assigningIssueId]);
 
   const filteredData = useMemo(() => {
     let filtered = data;
@@ -216,6 +262,19 @@ export function QuickWinsTable({
       </CardHeader>
 
       <CardContent>
+        {assignmentSuccess && (
+          <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-center gap-2 text-green-700 dark:text-green-400">
+            <CheckCircle2 className="w-5 h-5" />
+            <span>Issue assigned successfully!</span>
+          </div>
+        )}
+
+        {assignmentError && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md flex items-center gap-2 text-red-700 dark:text-red-400">
+            <AlertCircle className="w-5 h-5" />
+            <span>{assignmentError}</span>
+          </div>
+        )}
         {/* Filters */}
         <div className="flex gap-4 mb-6">
           <Select value={languageFilter} onValueChange={setLanguageFilter}>

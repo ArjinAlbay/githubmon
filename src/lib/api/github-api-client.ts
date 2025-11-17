@@ -1318,6 +1318,55 @@ class GitHubAPIClient {
       };
     }
   }
+
+  async assignIssueToMe(
+    owner: string,
+    repo: string,
+    issueNumber: number
+  ): Promise<{ success: boolean; error?: string; username?: string }> {
+    if (!this.githubToken) {
+      return { success: false, error: "No GitHub token available" };
+    }
+
+    try {
+      const userResponse = await this.fetchWithCache<{ login: string }>(
+        "/user",
+        true
+      );
+      const username = userResponse.login;
+
+      const headers: HeadersInit = {
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "GitHubMon/1.0",
+        Authorization: `Bearer ${this.githubToken}`,
+        "Content-Type": "application/json",
+      };
+
+      const response = await fetch(
+        `${this.baseUrl}/repos/${owner}/${repo}/issues/${issueNumber}/assignees`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ assignees: [username] }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${errorText}`,
+        };
+      }
+
+      return { success: true, username };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 }
 
 export const githubAPIClient = new GitHubAPIClient();
