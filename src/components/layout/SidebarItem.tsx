@@ -39,8 +39,8 @@ export function SidebarItem({
     transition-all duration-200
     ${
       isActive
-        ? "bg-accent text-foreground"
-        : "hover:bg-accent/50 hover:text-foreground"
+        ? "bg-slate-700 text-slate-100"
+        : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
     }
     ${isCollapsed ? "justify-center" : ""}
     ${className}

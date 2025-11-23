@@ -46,8 +46,8 @@ export function SubMenuFlyout({
                 justify-center
                 ${
                   isActive
-                    ? "bg-accent text-foreground"
-                    : "hover:bg-accent/50 hover:text-foreground"
+                    ? "bg-slate-700 text-slate-100"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
                 }
               `}
             >
@@ -63,8 +63,8 @@ export function SubMenuFlyout({
       </TooltipProvider>
 
       <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-50 min-w-[200px]">
-        <div className="bg-popover border border-border rounded-lg shadow-lg py-2 px-1">
-          <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-lg py-2 px-1">
+          <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
             <span>{label}</span>
             {totalBadge !== undefined && (
               <Badge
@@ -83,8 +83,8 @@ export function SubMenuFlyout({
                 className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors font-medium
                   ${
                     item.isActive
-                      ? "bg-accent text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                      ? "bg-slate-700 text-slate-100"
+                      : "text-slate-300 hover:text-slate-100 hover:bg-slate-900"
                   }`}
               >
                 <item.icon className="w-4 h-4 shrink-0" />

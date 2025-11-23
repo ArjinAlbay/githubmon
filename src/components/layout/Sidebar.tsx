@@ -213,7 +213,7 @@ export function Sidebar() {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-visible">
           <div className="p-3">
             <nav className="space-y-1">
               <SidebarGroup
@@ -296,8 +296,8 @@ export function Sidebar() {
                             ${
                               pathname === "/action-required" &&
                               currentTab === "assigned"
-                                ? "bg-accent text-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                ? "bg-slate-700 text-slate-100"
+                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
                             }`}
                         >
                           <UserCheck className="w-4 h-4 shrink-0" />
@@ -315,8 +315,8 @@ export function Sidebar() {
                             ${
                               pathname === "/action-required" &&
                               currentTab === "mentions"
-                                ? "bg-accent text-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                ? "bg-slate-700 text-slate-100"
+                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
                             }`}
                         >
                           <MessageSquare className="w-4 h-4 shrink-0" />
@@ -334,8 +334,8 @@ export function Sidebar() {
                             ${
                               pathname === "/action-required" &&
                               currentTab === "stale"
-                                ? "bg-accent text-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                ? "bg-slate-700 text-slate-100"
+                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
                             }`}
                         >
                           <Clock className="w-4 h-4 shrink-0" />
@@ -410,8 +410,8 @@ export function Sidebar() {
                             ${
                               pathname === "/quick-wins" &&
                               currentTab === "good-issues"
-                                ? "bg-accent text-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                ? "bg-slate-700 text-slate-100"
+                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
                             }`}
                         >
                           <Lightbulb className="w-4 h-4 shrink-0" />
@@ -429,8 +429,8 @@ export function Sidebar() {
                             ${
                               pathname === "/quick-wins" &&
                               currentTab === "easy-fixes"
-                                ? "bg-accent text-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                ? "bg-slate-700 text-slate-100"
+                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
                             }`}
                         >
                           <Wrench className="w-4 h-4 shrink-0" />
@@ -475,7 +475,7 @@ export function Sidebar() {
                                   href={`https://github.com/${repo}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center justify-center px-3 py-2 rounded-lg hover:bg-accent/50 transition-colors"
+                                  className="flex items-center justify-center px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-slate-100"
                                   aria-label={repo}
                                 >
                                   <GitBranch className="w-4 h-4 shrink-0" />
@@ -494,7 +494,7 @@ export function Sidebar() {
                           href={`https://github.com/${repo}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-accent/50 transition-colors font-medium text-muted-foreground hover:text-foreground"
+                          className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-slate-800 transition-colors font-medium text-slate-300 hover:text-slate-100"
                         >
                           <GitBranch className="w-4 h-4 shrink-0" />
                           <span className="truncate flex-1">{repo}</span>
