@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { User, Settings, LogOut, Loader2, MoreVertical } from "lucide-react";
+import { User, Settings, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,8 +41,13 @@ export function UserProfileMenu({
   onLogout,
 }: UserProfileMenuProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogoutConfirm = async () => {
     if (isLoggingOut) return;
 
     setIsLoggingOut(true);
@@ -45,6 +58,7 @@ export function UserProfileMenu({
       window.location.replace("/");
     } finally {
       setIsLoggingOut(false);
+      setShowLogoutDialog(false);
     }
   };
 
@@ -56,14 +70,14 @@ export function UserProfileMenu({
 
   if (isCollapsed) {
     return (
-      <div className="p-3 border-t border-sidebar-border flex-shrink-0">
+      <div className="p-3 border-t border-slate-700 dark:border-slate-800 flex-shrink-0">
         <DropdownMenu>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                    className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-900 transition-colors"
                     aria-label="User menu"
                   >
                     {avatarContent}
@@ -91,7 +105,7 @@ export function UserProfileMenu({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               disabled={isLoggingOut}
               className="cursor-pointer text-destructive focus:text-destructive"
             >
@@ -104,57 +118,155 @@ export function UserProfileMenu({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Çıkış yapmak istediğinize emin misiniz?</DialogTitle>
+              <DialogDescription>
+                Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowLogoutDialog(false)}
+                disabled={isLoggingOut}
+              >
+                İptal
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleLogoutConfirm}
+                disabled={isLoggingOut}
+              >
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Çıkış yapılıyor...
+                  </>
+                ) : (
+                  "Çıkış Yap"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
 
   return (
-    <div className="p-3 border-t border-sidebar-border flex-shrink-0 space-y-2">
-      <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-accent/30">
+    <div className="p-3 border-t border-slate-700 dark:border-slate-800 flex-shrink-0">
+      <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-slate-800 dark:bg-slate-900 mb-3">
         {avatarContent}
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium truncate">{username}</div>
-          <div className="text-xs text-muted-foreground truncate">
+          <div className="text-sm font-medium truncate text-slate-100">{username}</div>
+          <div className="text-xs text-slate-400 truncate">
             {orgName || "GitHub User"}
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 px-2">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                aria-label="Profile"
+              >
+                <User className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Profile</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                asChild
+              >
+                <Link href="/settings" aria-label="Settings">
+                  <Settings className="w-4 h-4" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Settings</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <ThemeToggle />
+
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                onClick={handleLogoutClick}
+                disabled={isLoggingOut}
+                aria-label="Logout"
+              >
+                {isLoggingOut ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <LogOut className="w-4 h-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Logout</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Çıkış yapmak istediğinize emin misiniz?</DialogTitle>
+            <DialogDescription>
+              Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
             <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              aria-label="User menu"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link href="/settings" className="cursor-pointer">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleLogout}
+              variant="outline"
+              onClick={() => setShowLogoutDialog(false)}
               disabled={isLoggingOut}
-              className="cursor-pointer text-destructive focus:text-destructive"
+            >
+              İptal
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLogoutConfirm}
+              disabled={isLoggingOut}
             >
               {isLoggingOut ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Çıkış yapılıyor...
+                </>
               ) : (
-                <LogOut className="w-4 h-4 mr-2" />
+                "Çıkış Yap"
               )}
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="flex items-center justify-center">
-        <ThemeToggle />
-      </div>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

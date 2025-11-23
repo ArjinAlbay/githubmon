@@ -29,10 +29,17 @@ import {
   Pin,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AnimatedLogo } from "./AnimatedLogo";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarGroup } from "./SidebarGroup";
 import { UserProfileMenu } from "./UserProfileMenu";
+import { SubMenuFlyout } from "./SubMenuFlyout";
 
 export function Sidebar() {
   const searchParams = useSearchParams();
@@ -148,7 +155,7 @@ export function Sidebar() {
 
       <aside
         className={`
-        fixed top-0 left-0 bg-muted/40 border-r border-sidebar-border z-50 transform transition-all duration-300 ease-in-out
+        fixed top-0 left-0 bg-slate-900 dark:bg-slate-950 border-r border-slate-700 dark:border-slate-800 z-50 transform transition-all duration-300 ease-in-out
         ${sidebarCollapsed ? "lg:w-[70px] w-64" : "w-64"}
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0
@@ -156,16 +163,16 @@ export function Sidebar() {
         h-screen
       `}
       >
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-slate-700 dark:border-slate-800 shrink-0">
           {!sidebarCollapsed ? (
             <>
               <div className="flex items-center gap-3">
                 <AnimatedLogo size={32} />
                 <div>
-                  <h2 className="text-lg font-bold text-sidebar-foreground">
+                  <h2 className="text-lg font-bold text-slate-100">
                     GitHubMon
                   </h2>
-                  <p className="text-xs text-muted-foreground">OSS Analytics</p>
+                  <p className="text-xs text-slate-400">OSS Analytics</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -180,14 +187,19 @@ export function Sidebar() {
                 </Button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="lg:hidden text-muted-foreground hover:text-sidebar-foreground transition-colors h-8 w-8 flex items-center justify-center"
+                  className="lg:hidden text-slate-400 hover:text-slate-100 transition-colors h-8 w-8 flex items-center justify-center"
                 >
                   ✕
                 </button>
               </div>
             </>
           ) : (
-            <div className="w-full flex justify-center">
+            <div className="w-full flex flex-col items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                {hasHydrated && orgData?.username
+                  ? orgData.username.charAt(0).toUpperCase()
+                  : "G"}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -220,12 +232,34 @@ export function Sidebar() {
 
               <div>
                 {sidebarCollapsed ? (
-                  <SidebarItem
+                  <SubMenuFlyout
                     icon={Zap}
-                    text="Action Required"
-                    href="/action-required"
+                    label="Action Required"
+                    totalBadge={getActionRequiredTotal}
                     isActive={isActionRequiredTab}
-                    isCollapsed={sidebarCollapsed}
+                    items={[
+                      {
+                        icon: UserCheck,
+                        label: "Assigned",
+                        href: "/action-required?tab=assigned",
+                        badge: getBadgeContent("assigned"),
+                        isActive: pathname === "/action-required" && currentTab === "assigned",
+                      },
+                      {
+                        icon: MessageSquare,
+                        label: "Mentions",
+                        href: "/action-required?tab=mentions",
+                        badge: getBadgeContent("mentions"),
+                        isActive: pathname === "/action-required" && currentTab === "mentions",
+                      },
+                      {
+                        icon: Clock,
+                        label: "Stale PRs",
+                        href: "/action-required?tab=stale",
+                        badge: getBadgeContent("stale"),
+                        isActive: pathname === "/action-required" && currentTab === "stale",
+                      },
+                    ]}
                   />
                 ) : (
                   <>
@@ -321,12 +355,27 @@ export function Sidebar() {
 
               <div>
                 {sidebarCollapsed ? (
-                  <SidebarItem
+                  <SubMenuFlyout
                     icon={Target}
-                    text="Quick Wins"
-                    href="/quick-wins"
+                    label="Quick Wins"
+                    totalBadge={getQuickWinsTotal}
                     isActive={isQuickWinsTab}
-                    isCollapsed={sidebarCollapsed}
+                    items={[
+                      {
+                        icon: Lightbulb,
+                        label: "Good First Issues",
+                        href: "/quick-wins?tab=good-issues",
+                        badge: getBadgeContent("goodFirstIssues"),
+                        isActive: pathname === "/quick-wins" && currentTab === "good-issues",
+                      },
+                      {
+                        icon: Wrench,
+                        label: "Easy Fixes",
+                        href: "/quick-wins?tab=easy-fixes",
+                        badge: getBadgeContent("easyFixes"),
+                        isActive: pathname === "/quick-wins" && currentTab === "easy-fixes",
+                      },
+                    ]}
                   />
                 ) : (
                   <>
@@ -399,12 +448,6 @@ export function Sidebar() {
                 )}
               </div>
 
-              <SidebarGroup
-                title="WORKSPACE"
-                isCollapsed={sidebarCollapsed}
-                className="mt-6"
-              />
-
               <SidebarItem
                 icon={Star}
                 text="Favorites"
@@ -421,9 +464,31 @@ export function Sidebar() {
                     isCollapsed={sidebarCollapsed}
                     className="mt-6"
                   />
-                  {!sidebarCollapsed && (
-                    <div className="space-y-1">
-                      {pinnedRepos.slice(0, 5).map((repo) => (
+                  <div className="space-y-1">
+                    {pinnedRepos.slice(0, 5).map((repo) => {
+                      if (sidebarCollapsed) {
+                        return (
+                          <TooltipProvider key={repo} delayDuration={0}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <a
+                                  href={`https://github.com/${repo}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center px-3 py-2 rounded-lg hover:bg-accent/50 transition-colors"
+                                  aria-label={repo}
+                                >
+                                  <GitBranch className="w-4 h-4 shrink-0" />
+                                </a>
+                              </TooltipTrigger>
+                              <TooltipContent side="right">
+                                <p>{repo}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        );
+                      }
+                      return (
                         <a
                           key={repo}
                           href={`https://github.com/${repo}`}
@@ -434,9 +499,9 @@ export function Sidebar() {
                           <GitBranch className="w-4 h-4 shrink-0" />
                           <span className="truncate flex-1">{repo}</span>
                         </a>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </>
               )}
             </nav>
