@@ -155,7 +155,7 @@ export function Sidebar() {
 
       <aside
         className={`
-        fixed top-0 left-0 bg-slate-900 border-r border-slate-700 z-50 transform transition-all duration-300 ease-in-out
+        fixed top-0 left-0 bg-slate-900 border-r border-slate-700 z-50 transform transition-all duration-300 ease-in-out overflow-x-visible
         ${sidebarCollapsed ? "lg:w-[70px] w-64" : "w-64"}
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0
@@ -213,7 +213,7 @@ export function Sidebar() {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-visible">
+        <div className="flex-1 overflow-y-auto" style={{ overflowX: 'visible' }}>
           <div className="p-3">
             <nav className="space-y-1">
               <SidebarGroup

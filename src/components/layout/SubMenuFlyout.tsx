@@ -62,7 +62,7 @@ export function SubMenuFlyout({
         </Tooltip>
       </TooltipProvider>
 
-      <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-50 min-w-[200px]">
+      <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-[100] min-w-[200px]">
         <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-lg py-2 px-1">
           <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
             <span>{label}</span>
