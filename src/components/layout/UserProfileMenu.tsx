@@ -70,14 +70,14 @@ export function UserProfileMenu({
 
   if (isCollapsed) {
     return (
-      <div className="p-3 border-t border-slate-700 dark:border-slate-800 flex-shrink-0">
+      <div className="p-3 border-t border-slate-700 flex-shrink-0">
         <DropdownMenu>
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-900 transition-colors"
+                    className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-slate-800 transition-colors"
                     aria-label="User menu"
                   >
                     {avatarContent}
@@ -122,9 +122,9 @@ export function UserProfileMenu({
         <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Çıkış yapmak istediğinize emin misiniz?</DialogTitle>
+              <DialogTitle>Are you sure you want to log out?</DialogTitle>
               <DialogDescription>
-                Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+                Your session will be terminated and you will be redirected to the login page.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -133,7 +133,7 @@ export function UserProfileMenu({
                 onClick={() => setShowLogoutDialog(false)}
                 disabled={isLoggingOut}
               >
-                İptal
+                Cancel
               </Button>
               <Button
                 variant="destructive"
@@ -143,10 +143,10 @@ export function UserProfileMenu({
                 {isLoggingOut ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Çıkış yapılıyor...
+                    Logging out...
                   </>
                 ) : (
-                  "Çıkış Yap"
+                  "Log Out"
                 )}
               </Button>
             </DialogFooter>
@@ -157,17 +157,7 @@ export function UserProfileMenu({
   }
 
   return (
-    <div className="p-3 border-t border-slate-700 dark:border-slate-800 flex-shrink-0">
-      <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-slate-800 dark:bg-slate-900 mb-3">
-        {avatarContent}
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium truncate text-slate-100">{username}</div>
-          <div className="text-xs text-slate-400 truncate">
-            {orgName || "GitHub User"}
-          </div>
-        </div>
-      </div>
-
+    <div className="p-3 border-t border-slate-700 flex-shrink-0">
       <div className="flex items-center justify-between gap-2 px-2">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
@@ -237,9 +227,9 @@ export function UserProfileMenu({
       <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Çıkış yapmak istediğinize emin misiniz?</DialogTitle>
+            <DialogTitle>Are you sure you want to log out?</DialogTitle>
             <DialogDescription>
-              Oturumunuz sonlandırılacak ve giriş sayfasına yönlendirileceksiniz.
+              Your session will be terminated and you will be redirected to the login page.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -248,7 +238,7 @@ export function UserProfileMenu({
               onClick={() => setShowLogoutDialog(false)}
               disabled={isLoggingOut}
             >
-              İptal
+              Cancel
             </Button>
             <Button
               variant="destructive"
@@ -258,10 +248,10 @@ export function UserProfileMenu({
               {isLoggingOut ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Çıkış yapılıyor...
+                  Logging out...
                 </>
               ) : (
-                "Çıkış Yap"
+                "Log Out"
               )}
             </Button>
           </DialogFooter>

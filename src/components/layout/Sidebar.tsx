@@ -155,7 +155,7 @@ export function Sidebar() {
 
       <aside
         className={`
-        fixed top-0 left-0 bg-slate-900 dark:bg-slate-950 border-r border-slate-700 dark:border-slate-800 z-50 transform transition-all duration-300 ease-in-out
+        fixed top-0 left-0 bg-slate-900 border-r border-slate-700 z-50 transform transition-all duration-300 ease-in-out
         ${sidebarCollapsed ? "lg:w-[70px] w-64" : "w-64"}
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0
@@ -163,7 +163,7 @@ export function Sidebar() {
         h-screen
       `}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-700 dark:border-slate-800 shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-slate-700 shrink-0">
           {!sidebarCollapsed ? (
             <>
               <div className="flex items-center gap-3">

@@ -40,9 +40,10 @@ export function SubMenuFlyout({
           <TooltipTrigger asChild>
             <div
               className={`
-                flex items-center justify-center px-3 py-2 rounded-lg
+                flex items-center gap-3 px-3 py-2 rounded-lg
                 text-sm font-medium cursor-pointer
                 transition-all duration-200
+                justify-center
                 ${
                   isActive
                     ? "bg-accent text-foreground"
@@ -50,7 +51,7 @@ export function SubMenuFlyout({
                 }
               `}
             >
-              <div className="shrink-0 min-w-[20px] flex items-center justify-center">
+              <div className="shrink-0 w-5 h-5 flex items-center justify-center">
                 <Icon className="w-5 h-5" aria-hidden="true" />
               </div>
             </div>

@@ -48,7 +48,7 @@ export function SidebarItem({
 
   const content = (
     <>
-      <div className="shrink-0 min-w-[20px] flex items-center justify-center">
+      <div className="shrink-0 w-5 h-5 flex items-center justify-center">
         <Icon className="w-5 h-5" aria-hidden="true" />
       </div>
       {!isCollapsed && (
