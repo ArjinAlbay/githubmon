@@ -4,11 +4,10 @@ import Link from "next/link";
 import { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface SubMenuItem {
   icon: LucideIcon;
@@ -34,36 +33,31 @@ export function SubMenuFlyout({
   isActive = false,
 }: SubMenuFlyoutProps) {
   return (
-    <div className="relative group">
-      <TooltipProvider delayDuration={0}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className={`
-                flex items-center gap-3 px-3 py-2 rounded-lg
-                text-sm font-medium cursor-pointer
-                transition-all duration-200
-                justify-center
-                ${
-                  isActive
-                    ? "bg-slate-700 text-slate-100"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-                }
-              `}
-            >
-              <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-                <Icon className="w-5 h-5" aria-hidden="true" />
-              </div>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            <p>{label}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-[100] min-w-[200px]">
-        <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-lg py-2 px-1">
+    <HoverCard openDelay={0} closeDelay={50}>
+      <HoverCardTrigger asChild>
+        <div
+          className={`
+            flex items-center gap-3 px-3 py-2 rounded-lg
+            text-sm font-medium cursor-pointer
+            transition-all duration-200
+            justify-center
+            ${
+              isActive
+                ? "bg-slate-700 text-slate-100"
+                : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+            }
+          `}
+        >
+          <div className="shrink-0 w-5 h-5 flex items-center justify-center">
+            <Icon className="w-5 h-5" aria-hidden="true" />
+          </div>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        side="right"
+        className="p-1 min-w-[200px] bg-slate-800 border-slate-700"
+      >
+        <div className="bg-slate-800 rounded-lg shadow-lg py-2 px-1">
           <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
             <span>{label}</span>
             {totalBadge !== undefined && (
@@ -101,7 +95,7 @@ export function SubMenuFlyout({
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 }

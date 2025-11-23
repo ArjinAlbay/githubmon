@@ -289,64 +289,64 @@ export function Sidebar() {
                     />
 
                     {actionRequiredOpen && (
-                      <div className="ml-4 pl-4 space-y-1 mt-1 border-l-2 border-muted">
-                        <Link
+                      <div className="space-y-1 mt-1">
+                        <SidebarItem
+                          icon={UserCheck}
+                          text="Assigned"
                           href="/action-required?tab=assigned"
-                          className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium
-                            ${
-                              pathname === "/action-required" &&
-                              currentTab === "assigned"
-                                ? "bg-slate-700 text-slate-100"
-                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
-                            }`}
-                        >
-                          <UserCheck className="w-4 h-4 shrink-0" />
-                          <span className="flex-1">Assigned</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto text-xs bg-muted/30 border-muted-foreground/20"
-                          >
-                            {getBadgeContent("assigned")}
-                          </Badge>
-                        </Link>
-                        <Link
+                          isActive={
+                            pathname === "/action-required" &&
+                            currentTab === "assigned"
+                          }
+                          isCollapsed={sidebarCollapsed}
+                          badge={
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-muted/30 border-muted-foreground/20"
+                            >
+                              {getBadgeContent("assigned")}
+                            </Badge>
+                          }
+                          className="pl-8"
+                        />
+                        <SidebarItem
+                          icon={MessageSquare}
+                          text="Mentions"
                           href="/action-required?tab=mentions"
-                          className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium
-                            ${
-                              pathname === "/action-required" &&
-                              currentTab === "mentions"
-                                ? "bg-slate-700 text-slate-100"
-                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
-                            }`}
-                        >
-                          <MessageSquare className="w-4 h-4 shrink-0" />
-                          <span className="flex-1">Mentions</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto text-xs bg-muted/30 border-muted-foreground/20"
-                          >
-                            {getBadgeContent("mentions")}
-                          </Badge>
-                        </Link>
-                        <Link
+                          isActive={
+                            pathname === "/action-required" &&
+                            currentTab === "mentions"
+                          }
+                          isCollapsed={sidebarCollapsed}
+                          badge={
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-muted/30 border-muted-foreground/20"
+                            >
+                              {getBadgeContent("mentions")}
+                            </Badge>
+                          }
+                          className="pl-8"
+                        />
+                        <SidebarItem
+                          icon={Clock}
+                          text="Stale PRs"
                           href="/action-required?tab=stale"
-                          className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium
-                            ${
-                              pathname === "/action-required" &&
-                              currentTab === "stale"
-                                ? "bg-slate-700 text-slate-100"
-                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
-                            }`}
-                        >
-                          <Clock className="w-4 h-4 shrink-0" />
-                          <span className="flex-1">Stale PRs</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto text-xs bg-muted/30 border-muted-foreground/20"
-                          >
-                            {getBadgeContent("stale")}
-                          </Badge>
-                        </Link>
+                          isActive={
+                            pathname === "/action-required" &&
+                            currentTab === "stale"
+                          }
+                          isCollapsed={sidebarCollapsed}
+                          badge={
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-muted/30 border-muted-foreground/20"
+                            >
+                              {getBadgeContent("stale")}
+                            </Badge>
+                          }
+                          className="pl-8"
+                        />
                       </div>
                     )}
                   </>
@@ -403,45 +403,45 @@ export function Sidebar() {
                     />
 
                     {quickWinsOpen && (
-                      <div className="ml-4 pl-4 space-y-1 mt-1 border-l-2 border-muted">
-                        <Link
+                      <div className="space-y-1 mt-1">
+                        <SidebarItem
+                          icon={Lightbulb}
+                          text="Good First Issues"
                           href="/quick-wins?tab=good-issues"
-                          className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium
-                            ${
-                              pathname === "/quick-wins" &&
-                              currentTab === "good-issues"
-                                ? "bg-slate-700 text-slate-100"
-                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
-                            }`}
-                        >
-                          <Lightbulb className="w-4 h-4 shrink-0" />
-                          <span className="flex-1">Good First Issues</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto text-xs bg-muted/30 border-muted-foreground/20"
-                          >
-                            {getBadgeContent("goodFirstIssues")}
-                          </Badge>
-                        </Link>
-                        <Link
+                          isActive={
+                            pathname === "/quick-wins" &&
+                            currentTab === "good-issues"
+                          }
+                          isCollapsed={sidebarCollapsed}
+                          badge={
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-muted/30 border-muted-foreground/20"
+                            >
+                              {getBadgeContent("goodFirstIssues")}
+                            </Badge>
+                          }
+                          className="pl-8"
+                        />
+                        <SidebarItem
+                          icon={Wrench}
+                          text="Easy Fixes"
                           href="/quick-wins?tab=easy-fixes"
-                          className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium
-                            ${
-                              pathname === "/quick-wins" &&
-                              currentTab === "easy-fixes"
-                                ? "bg-slate-700 text-slate-100"
-                                : "text-slate-300 hover:text-slate-100 hover:bg-slate-800"
-                            }`}
-                        >
-                          <Wrench className="w-4 h-4 shrink-0" />
-                          <span className="flex-1">Easy Fixes</span>
-                          <Badge
-                            variant="outline"
-                            className="ml-auto text-xs bg-muted/30 border-muted-foreground/20"
-                          >
-                            {getBadgeContent("easyFixes")}
-                          </Badge>
-                        </Link>
+                          isActive={
+                            pathname === "/quick-wins" &&
+                            currentTab === "easy-fixes"
+                          }
+                          isCollapsed={sidebarCollapsed}
+                          badge={
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-muted/30 border-muted-foreground/20"
+                            >
+                              {getBadgeContent("easyFixes")}
+                            </Badge>
+                          }
+                          className="pl-8"
+                        />
                       </div>
                     )}
                   </>
