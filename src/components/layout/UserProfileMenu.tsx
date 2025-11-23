@@ -171,8 +171,16 @@ export function UserProfileMenu({
                 <User className="w-4 h-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>Profile</p>
+            <TooltipContent side="top" className="p-3">
+              <div className="flex items-center gap-3">
+                {avatarContent}
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium">{username}</p>
+                  {orgName && (
+                    <p className="text-xs text-muted-foreground">{orgName}</p>
+                  )}
+                </div>
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
