@@ -165,7 +165,7 @@ export function UserProfileMenu({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 text-slate-100 hover:text-slate-100 hover:bg-slate-800"
                 aria-label="Profile"
               >
                 <User className="w-4 h-4" />
@@ -191,7 +191,7 @@ export function UserProfileMenu({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 text-slate-100 hover:text-slate-100 hover:bg-slate-800"
                 asChild
               >
                 <Link href="/settings" aria-label="Settings">
@@ -213,7 +213,7 @@ export function UserProfileMenu({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-slate-800"
                 onClick={handleLogoutClick}
                 disabled={isLoggingOut}
                 aria-label="Logout"

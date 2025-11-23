@@ -180,7 +180,7 @@ export function Sidebar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSidebarCollapsed(true)}
-                  className="hidden lg:flex h-8 w-8 p-0"
+                  className="hidden lg:flex h-8 w-8 p-0 text-slate-100 hover:text-slate-100 hover:bg-slate-800"
                   title="Collapse sidebar"
                 >
                   <PanelLeftClose className="h-4 w-4" />
@@ -204,7 +204,7 @@ export function Sidebar() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSidebarCollapsed(false)}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 text-slate-100 hover:text-slate-100 hover:bg-slate-800"
                 title="Expand sidebar"
               >
                 <PanelLeftOpen className="h-4 w-4" />
