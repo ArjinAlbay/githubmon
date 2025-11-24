@@ -72,8 +72,6 @@ export function QuickWinsTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [languageFilter, setLanguageFilter] = useState<string>("all");
-
   const addTask = useKanbanStore((state) => state.addTask);
   const dismissedIssues = useQuickWinsStore((state) => state.dismissedIssues);
   const dismissIssue = useQuickWinsStore((state) => state.dismissIssue);
@@ -101,33 +99,13 @@ export function QuickWinsTable({
     [handleAddToKanban, handleDismiss]
   );
 
+  // Filter out dismissed issues
   const filteredData = useMemo(() => {
-    let filtered = data;
-
     if (isHydrated) {
-      filtered = filtered.filter((item) => !dismissedIssues.has(item.id));
+      return data.filter((item) => !dismissedIssues.has(item.id));
     }
-
-    if (languageFilter !== "all") {
-      filtered = filtered.filter((item) => item.language === languageFilter);
-    }
-
-    return filtered;
-  }, [data, languageFilter, dismissedIssues, isHydrated]);
-
-  const availableLanguages = useMemo(() => {
-    const languages = [
-      ...new Set(
-        data
-          .map((item) => item.language)
-          .filter(
-            (lang): lang is string =>
-              typeof lang === "string" && lang.trim() !== ""
-          )
-      ),
-    ];
-    return languages.sort();
-  }, [data]);
+    return data;
+  }, [data, dismissedIssues, isHydrated]);
 
   const table = useReactTable({
     data: filteredData,
@@ -234,23 +212,6 @@ export function QuickWinsTable({
       </CardHeader>
 
       <CardContent>
-        {/* Filters */}
-        <div className="flex gap-4 mb-6">
-          <Select value={languageFilter} onValueChange={setLanguageFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Language" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Languages</SelectItem>
-              {availableLanguages.map((lang) => (
-                <SelectItem key={lang} value={lang}>
-                  {lang}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Table */}
         <div className="rounded-md border">
           <Table>

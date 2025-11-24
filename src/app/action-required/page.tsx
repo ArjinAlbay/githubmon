@@ -47,6 +47,8 @@ import { SearchModal } from "@/components/search/SearchModal";
 import { QuickActionsMenu } from "@/components/action-required/QuickActionsMenu";
 import { DetailPanel } from "@/components/ui/detail-panel";
 import { NewIssueDialog } from "@/components/action-required/NewIssueDialog";
+import { useActionRequiredFilters } from "@/hooks/useFilters";
+import { ActionRequiredFiltersPanel } from "@/components/filters/ActionRequiredFiltersPanel";
 
 interface ActionItem {
   id: string | number;
@@ -123,13 +125,14 @@ function ActionRequiredContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isNewIssueOpen, setIsNewIssueOpen] = useState(false);
+  
+  const { filters, updateFilters, resetFilters, hasActiveFilters } = useActionRequiredFilters();
 
   const tabParam = searchParams?.get("tab");
   const currentTab: ValidTab = VALID_TABS.includes(tabParam as ValidTab)
     ? (tabParam as ValidTab)
     : "all";
 
-  // Memoize refreshData to prevent unnecessary calls
   const STALE_THRESHOLD = 5 * 60 * 1000;
 
   const refreshActiveTab = useCallback((tabType: ValidTab) => {
@@ -213,14 +216,58 @@ function ActionRequiredContent() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [currentTab, refreshActiveTab, refreshData, STALE_THRESHOLD]);
 
+  const applyFilters = useCallback((items: ActionItem[]) => {
+    return items.filter((item) => {
+      if (filters.assignee.length > 0) {
+        const assigneeLogin = item.author?.login;
+        if (!assigneeLogin || !filters.assignee.includes(assigneeLogin)) {
+          return false;
+        }
+      }
+
+      if (filters.repository.length > 0 && !filters.repository.includes(item.repo)) {
+        return false;
+      }
+
+      if (filters.labels.length > 0) {
+        const itemLabels = item.labels.map(l => l.name);
+        const hasMatchingLabel = filters.labels.some(label => itemLabels.includes(label));
+        if (!hasMatchingLabel) {
+          return false;
+        }
+      }
+
+      if (filters.type.length > 0 && !filters.type.includes(item.type as "issue" | "pullRequest")) {
+        return false;
+      }
+
+      if (filters.staleness !== null && filters.staleness > 0) {
+        if (!item.daysOld || item.daysOld < filters.staleness) {
+          return false;
+        }
+      }
+
+      if (filters.language.length > 0) {
+        if (!item.language || !filters.language.includes(item.language)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [filters]);
+
   const actionItemsByType = useMemo(
-    () => ({
-      all: [...assignedItems, ...mentionItems, ...staleItems],
-      assigned: assignedItems,
-      mentions: mentionItems,
-      stale: staleItems,
-    }),
-    [assignedItems, mentionItems, staleItems]
+    () => {
+      const allItems = [...assignedItems, ...mentionItems, ...staleItems];
+      return {
+        all: applyFilters(allItems),
+        assigned: applyFilters(assignedItems),
+        mentions: applyFilters(mentionItems),
+        stale: applyFilters(staleItems),
+      };
+    },
+    [assignedItems, mentionItems, staleItems, applyFilters]
   );
 
   const itemCounts = useMemo(
@@ -232,6 +279,36 @@ function ActionRequiredContent() {
     }),
     [actionItemsByType]
   );
+
+  const availableFilterOptions = useMemo(() => {
+    const allItems = [...assignedItems, ...mentionItems, ...staleItems];
+    
+    const assignees = new Set<string>();
+    const repositories = new Set<string>();
+    const labels: Array<{ name: string; color?: string }> = [];
+    const labelSet = new Set<string>();
+    const languages = new Set<string>();
+
+    allItems.forEach((item) => {
+      if (item.author?.login) assignees.add(item.author.login);
+      if (item.repo) repositories.add(item.repo);
+      if (item.language) languages.add(item.language);
+      
+      item.labels.forEach((label) => {
+        if (!labelSet.has(label.name)) {
+          labelSet.add(label.name);
+          labels.push({ name: label.name, color: label.color });
+        }
+      });
+    });
+
+    return {
+      assignees: Array.from(assignees).sort(),
+      repositories: Array.from(repositories).sort(),
+      labels: labels.sort((a, b) => a.name.localeCompare(b.name)),
+      languages: Array.from(languages).sort(),
+    };
+  }, [assignedItems, mentionItems, staleItems]);
 
   const getActionItems = useCallback(
     (type: "all" | "assigned" | "mentions" | "stale") => {
@@ -281,39 +358,15 @@ function ActionRequiredContent() {
       ? errors.assigned || errors.mentions || errors.stale
       : errors[type];
 
-    const [selectedRepo, setSelectedRepo] = useState<string>("all");
-    const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
     const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
     const { addTaskFromActionItem } = useKanbanStore();
     const { openPanel } = useDetailPanelStore();
 
-    const repositories = useMemo(() => {
-      const repos = new Set(items.map((item: ActionItem) => item.repo));
-      return Array.from(repos).sort();
-    }, [items]);
-
-    const languages = useMemo(() => {
-      const langs = new Set(
-        items
-          .map((item: ActionItem) => item.language)
-          .filter((lang): lang is string => !!lang)
-      );
-      return Array.from(langs).sort();
-    }, [items]);
-
-    const filteredItems = useMemo(() => {
-      return items.filter((item: ActionItem) => {
-        if (selectedRepo !== "all" && item.repo !== selectedRepo) return false;
-        if (selectedLanguage !== "all" && item.language !== selectedLanguage) return false;
-        return true;
-      });
-    }, [items, selectedRepo, selectedLanguage]);
-
     const toggleSelectAll = () => {
-      if (selectedItems.size === filteredItems.length) {
+      if (selectedItems.size === items.length) {
         setSelectedItems(new Set());
       } else {
-        setSelectedItems(new Set(filteredItems.map((item: ActionItem) => item.id.toString())));
+        setSelectedItems(new Set(items.map((item: ActionItem) => item.id.toString())));
       }
     };
 
@@ -328,7 +381,7 @@ function ActionRequiredContent() {
     };
 
     const handleBulkAddToKanban = () => {
-      const itemsToAdd = filteredItems.filter((item: ActionItem) =>
+      const itemsToAdd = items.filter((item: ActionItem) =>
         selectedItems.has(item.id.toString())
       );
       itemsToAdd.forEach((item: ActionItem) => {
@@ -436,56 +489,22 @@ function ActionRequiredContent() {
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-4 flex-wrap">
+        {selectedItems.size > 0 && (
           <div className="flex items-center gap-2">
-            <Select value={selectedRepo} onValueChange={setSelectedRepo}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Repositories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Repositories</SelectItem>
-                {repositories.map((repo) => (
-                  <SelectItem key={repo} value={repo}>
-                    {repo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Badge variant="secondary">{selectedItems.size} selected</Badge>
+            <Button size="sm" onClick={handleBulkAddToKanban}>
+              <Plus className="w-4 h-4 mr-2" />
+              Bulk Add to Kanban
+            </Button>
           </div>
-          {languages.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="All Languages" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Languages</SelectItem>
-                  {languages.map((lang) => (
-                    <SelectItem key={lang} value={lang}>
-                      {lang}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          {selectedItems.size > 0 && (
-            <div className="flex items-center gap-2 ml-auto">
-              <Badge variant="secondary">{selectedItems.size} selected</Badge>
-              <Button size="sm" onClick={handleBulkAddToKanban}>
-                <Plus className="w-4 h-4 mr-2" />
-                Bulk Add to Kanban
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[3%]">
                   <Checkbox
-                    checked={selectedItems.size === filteredItems.length && filteredItems.length > 0}
+                    checked={selectedItems.size === items.length && items.length > 0}
                     onCheckedChange={toggleSelectAll}
                   />
                 </TableHead>
@@ -500,7 +519,7 @@ function ActionRequiredContent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredItems.map((item: ActionItem) => (
+              {items.map((item: ActionItem) => (
               <TableRow
                 key={item.id}
                 className={`${getStaleRowClassName(item.daysOld)} cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50`}
@@ -728,6 +747,18 @@ function ActionRequiredContent() {
           Items that need your immediate attention across your repositories
         </p>
       </div>
+
+      {/* Filters Panel */}
+      <ActionRequiredFiltersPanel
+        filters={filters}
+        onFiltersChange={updateFilters}
+        onReset={resetFilters}
+        hasActiveFilters={hasActiveFilters}
+        availableAssignees={availableFilterOptions.assignees}
+        availableRepositories={availableFilterOptions.repositories}
+        availableLabels={availableFilterOptions.labels}
+        availableLanguages={availableFilterOptions.languages}
+      />
 
       {/* Action Required Tabs */}
       <Tabs

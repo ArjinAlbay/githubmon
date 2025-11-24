@@ -10,8 +10,11 @@ import { QuickWinsTable } from "@/components/quick-wins/QuickWinsTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Lightbulb, Wrench } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { RateLimitWarning } from "@/components/common/RateLimitWarning";
+import { useQuickWinsFilters } from "@/hooks/useFilters";
+import { QuickWinsFiltersPanel } from "@/components/filters/QuickWinsFiltersPanel";
+import type { GitHubIssue } from "@/types/quickWins";
 
 const VALID_TABS = ["good-issues", "easy-fixes"] as const;
 type ValidTab = (typeof VALID_TABS)[number];
@@ -20,6 +23,8 @@ function QuickWinsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [currentTab, setCurrentTab] = useState<ValidTab>("good-issues");
+  
+  const { filters, updateFilters, resetFilters, hasActiveFilters } = useQuickWinsFilters();
 
   useEffect(() => {
     const tabParam = searchParams?.get("tab");
@@ -46,6 +51,52 @@ function QuickWinsContent() {
     }
   };
 
+  const applyFilters = (issues: GitHubIssue[]) => {
+    return issues.filter((issue) => {
+      if (filters.difficulty.length > 0 && !filters.difficulty.includes(issue.difficulty)) {
+        return false;
+      }
+
+      if (filters.language.length > 0) {
+        if (!issue.language || !filters.language.includes(issue.language)) {
+          return false;
+        }
+      }
+
+      if (filters.repository.length > 0 && !filters.repository.includes(issue.repository)) {
+        return false;
+      }
+
+      if (filters.minStars !== null && filters.minStars > 0) {
+        if (issue.stars < filters.minStars) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
+
+  const filteredGoodIssues = useMemo(() => applyFilters(goodIssues), [goodIssues, filters]);
+  const filteredEasyFixes = useMemo(() => applyFilters(easyFixes), [easyFixes, filters]);
+
+  const availableFilterOptions = useMemo(() => {
+    const allIssues = [...goodIssues, ...easyFixes];
+    
+    const languages = new Set<string>();
+    const repositories = new Set<string>();
+
+    allIssues.forEach((issue) => {
+      if (issue.language) languages.add(issue.language);
+      if (issue.repository) repositories.add(issue.repository);
+    });
+
+    return {
+      languages: Array.from(languages).sort(),
+      repositories: Array.from(repositories).sort(),
+    };
+  }, [goodIssues, easyFixes]);
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <PageHeader />
@@ -67,6 +118,16 @@ function QuickWinsContent() {
         </p>
       </div>
 
+      {/* Filters Panel */}
+      <QuickWinsFiltersPanel
+        filters={filters}
+        onFiltersChange={updateFilters}
+        onReset={resetFilters}
+        hasActiveFilters={hasActiveFilters}
+        availableLanguages={availableFilterOptions.languages}
+        availableRepositories={availableFilterOptions.repositories}
+      />
+
       {/* Quick Wins Tabs */}
       <Tabs
         value={currentTab}
@@ -82,21 +143,21 @@ function QuickWinsContent() {
             <Lightbulb className="w-4 h-4" />
             Good First Issues
             <Badge variant="secondary" className="ml-1">
-              {goodIssues.length}
+              {filteredGoodIssues.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="easy-fixes" className="flex items-center gap-2">
             <Wrench className="w-4 h-4" />
             Easy Fixes
             <Badge variant="secondary" className="ml-1">
-              {easyFixes.length}
+              {filteredEasyFixes.length}
             </Badge>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="good-issues" className="mt-6">
           <QuickWinsTable
-            data={goodIssues}
+            data={filteredGoodIssues}
             loading={loadingGoodIssues}
             error={goodIssuesError}
             onRefresh={refreshGoodIssues}
@@ -107,7 +168,7 @@ function QuickWinsContent() {
 
         <TabsContent value="easy-fixes" className="mt-6">
           <QuickWinsTable
-            data={easyFixes}
+            data={filteredEasyFixes}
             loading={loadingEasyFixes}
             error={easyFixesError}
             onRefresh={refreshEasyFixes}
