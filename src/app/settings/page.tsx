@@ -1,6 +1,7 @@
 "use client";
 
 import { Layout } from "@/components/layout/Layout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -29,11 +30,8 @@ export default function SettingsPage() {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="flex items-center gap-3 mb-8">
-          <Settings className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Settings</h1>
-        </div>
+      <div className="max-w-5xl mx-auto p-6 space-y-6">
+        <PageHeader title="Settings" />
 
         <Tabs defaultValue="github" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">

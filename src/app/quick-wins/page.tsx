@@ -99,7 +99,7 @@ function QuickWinsContent() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <PageHeader />
+      <PageHeader title="Quick Wins" />
       <RateLimitWarning />
 
       {/* Hero Section */}
@@ -107,7 +107,9 @@ function QuickWinsContent() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Lightbulb className="w-6 h-6 text-yellow-500" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <span className="text-lg font-medium text-muted-foreground">
+              Easy opportunities to contribute and grow
+            </span>
               Quick Wins
             </h1>
           </div>

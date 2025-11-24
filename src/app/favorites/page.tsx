@@ -1,6 +1,7 @@
 "use client";
 
 import { Layout } from "@/components/layout/Layout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { FavoritesList } from "@/components/widget/FavoritesList";
 import { ActivityFeed } from "@/components/widget/ActivityFeed";
@@ -30,13 +31,12 @@ export default function FavoritesPage() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <PageHeader title="Favorites" />
+        
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Star className="h-8 w-8 text-yellow-500" />
-              Favorites
-            </h1>
-            <p className="text-muted-foreground mt-1">
+          <div className="flex items-center gap-2">
+            <Star className="h-6 w-6 text-yellow-500" />
+            <p className="text-muted-foreground">
               Track your favorite repositories and developers with live metrics
             </p>
           </div>
