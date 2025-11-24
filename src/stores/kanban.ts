@@ -102,7 +102,10 @@ interface KanbanState {
   filterPriority: string;
   filterType: string;
   showArchived: boolean;
+  showAddTaskModal: boolean;
+  addTaskColumnId: string;
 
+  setShowAddTaskModal: (show: boolean, columnId?: string) => void;
   syncFromGitHub: () => Promise<{ success: boolean; count?: number; error?: string }>;
   addTask: (
     task: Omit<KanbanTask, "id" | "createdAt" | "updatedAt"> & {
@@ -288,6 +291,15 @@ export const useKanbanStore = create<KanbanState>()(
       filterPriority: "all",
       filterType: "all",
       showArchived: false,
+      showAddTaskModal: false,
+      addTaskColumnId: "todo",
+
+      setShowAddTaskModal: (show: boolean, columnId?: string) => {
+        set({ 
+          showAddTaskModal: show,
+          addTaskColumnId: columnId || get().addTaskColumnId || "todo"
+        });
+      },
 
       syncFromGitHub: async () => {
         try {

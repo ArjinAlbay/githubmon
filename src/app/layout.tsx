@@ -9,6 +9,8 @@ import { DataInitializer } from "@/components/providers/DataInitializer";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { PageTracker } from "@/components/providers/PageTracker";
 import { ToasterProvider } from "@/components/providers/ToasterProvider";
+import { GlobalShortcutHandler } from "@/components/providers/GlobalShortcutHandler";
+import { GlobalModalProvider } from "@/components/providers/GlobalModalProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,6 +27,8 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           <ThemeProvider defaultTheme="system" storageKey="githubmon-theme">
+            <GlobalShortcutHandler />
+            <GlobalModalProvider />
             <OAuthSessionSync />
             <DataInitializer />
             <PageTracker />

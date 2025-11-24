@@ -253,13 +253,14 @@ export function KanbanBoard() {
     filterType,
     autoArchiveOldTasks,
     deduplicateAllColumns,
+    showAddTaskModal,
+    addTaskColumnId,
+    setShowAddTaskModal,
   } = useKanbanStore();
   const { orgData } = useAuthStore();
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
-  const [addTaskColumnId, setAddTaskColumnId] = useState<string | null>(null);
   const [showColumnManagement, setShowColumnManagement] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [closeOnGitHub, setCloseOnGitHub] = useState(false);
@@ -283,8 +284,7 @@ export function KanbanBoard() {
 
   useKanbanShortcuts({
     onNewTask: () => {
-      setAddTaskColumnId("todo");
-      setShowAddTaskModal(true);
+      setShowAddTaskModal(true, "todo");
     },
     onSync: handleSyncFromGitHub,
     onSearch: () => {
@@ -642,8 +642,7 @@ export function KanbanBoard() {
                       <button
                         className="w-full p-2 border-2 border-dashed border-muted rounded hover:border-primary hover:bg-primary/5 transition-colors text-muted-foreground hover:text-primary text-xs"
                         onClick={() => {
-                          setAddTaskColumnId(columnId);
-                          setShowAddTaskModal(true);
+                          setShowAddTaskModal(true, column.id);
                         }}
                       >
                         <Plus className="w-3 h-3 mx-auto" />

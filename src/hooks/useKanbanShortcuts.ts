@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import { useKanbanStore } from "@/stores/kanban";
 
 interface ShortcutHandlers {
   onNewTask?: () => void;
@@ -11,53 +12,82 @@ interface ShortcutHandlers {
 }
 
 export function useKanbanShortcuts(handlers: ShortcutHandlers) {
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const isInput =
-        (e.target as HTMLElement).tagName === "INPUT" ||
-        (e.target as HTMLElement).tagName === "TEXTAREA" ||
-        (e.target as HTMLElement).isContentEditable;
+  const setShowAddTaskModal = useKanbanStore((state) => state.setShowAddTaskModal);
+  
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const isInput =
+      (e.target as HTMLElement).tagName === "INPUT" ||
+      (e.target as HTMLElement).tagName === "TEXTAREA" ||
+      (e.target as HTMLElement).isContentEditable;
 
-      if ((e.ctrlKey || e.metaKey) && !isInput) {
-        switch (e.key.toLowerCase()) {
-          case "n":
-            e.preventDefault();
-            handlers.onNewTask?.();
-            break;
-          case "k":
-            e.preventDefault();
-            handlers.onSearch?.();
-            break;
-          case "r":
-            e.preventDefault();
-            handlers.onSync?.();
-            break;
-          case "l":
-            e.preventDefault();
-            handlers.onClear?.();
-            break;
-          case "e":
-            e.preventDefault();
-            handlers.onArchive?.();
-            break;
-        }
+    // Check for Alt+N to open new task modal - works globally
+    if (e.altKey && e.key.toLowerCase() === "n" && !isInput) {
+      console.log("⚡ Kanban: Alt+N detected, opening modal");
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      // Use global store function if no handler provided
+      if (handlers.onNewTask) {
+        handlers.onNewTask();
+      } else {
+        setShowAddTaskModal(true, "todo");
       }
+      return false;
+    }
 
-      if (e.key === "?" && !isInput) {
-        e.preventDefault();
-        handlers.onHelp?.();
+    if ((e.ctrlKey || e.metaKey) && !isInput) {
+      switch (e.key.toLowerCase()) {
+        case "k":
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handlers.onSearch?.();
+          return false;
+        case "r":
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handlers.onSync?.();
+          return false;
+        case "l":
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handlers.onClear?.();
+          return false;
+        case "e":
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handlers.onArchive?.();
+          return false;
       }
-    };
+    }
 
-    document.addEventListener("keydown", handleKeyPress);
-    return () => document.removeEventListener("keydown", handleKeyPress);
+    if (e.key === "?" && !isInput) {
+      e.preventDefault();
+      handlers.onHelp?.();
+    }
   }, [handlers]);
+
+  useEffect(() => {
+    // Attach multiple listeners for maximum coverage
+    // Use capture phase to intercept before any other handlers
+    window.addEventListener("keydown", handleKeyDown, true);
+    document.addEventListener("keydown", handleKeyDown, true);
+    
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [handleKeyDown]);
 }
 
 export function showKeyboardShortcutsHelp() {
   toast.info("Keyboard Shortcuts", {
     description: [
-      "Ctrl+N - New task",
+      "Alt+N - New task",
       "Ctrl+K - Search",
       "Ctrl+R - Sync from GitHub",
       "Ctrl+E - Toggle archive",
