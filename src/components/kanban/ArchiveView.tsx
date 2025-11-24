@@ -3,34 +3,54 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Archive, RotateCcw, Trash2, ExternalLink } from "lucide-react";
+import { Archive, RotateCcw, Trash2, ExternalLink, ArrowLeft } from "lucide-react";
 import { useKanbanStore } from "@/stores/kanban";
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
+import { useRouter } from "next/navigation";
 
 export function ArchiveView() {
   const { archivedTasks, restoreTask, deleteArchivedTask, clearArchive } =
     useKanbanStore();
+  const router = useRouter();
 
   const archivedTasksArray = Object.values(archivedTasks);
 
   if (archivedTasksArray.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <Archive className="w-12 h-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No archived tasks</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Tasks moved to archive will appear here
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Board
+          </Button>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Archive className="w-5 h-5" />
+            Archived Tasks (0)
+          </h3>
+        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Archive className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No archived tasks</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Tasks moved to archive will appear here
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   const handleRestore = (taskId: string) => {
     restoreTask(taskId);
     toast.success("Task restored to board");
+    router.push("/dashboard");
   };
 
   const handleDelete = (taskId: string) => {
@@ -54,10 +74,21 @@ export function ArchiveView() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Archive className="w-5 h-5" />
-          Archived Tasks ({archivedTasksArray.length})
-        </h3>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Board
+          </Button>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Archive className="w-5 h-5" />
+            Archived Tasks ({archivedTasksArray.length})
+          </h3>
+        </div>
         {archivedTasksArray.length > 0 && (
           <Button
             variant="destructive"

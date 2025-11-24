@@ -30,15 +30,15 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Plus, ExternalLink, GripVertical, Trash2, Eye, RefreshCw, Settings, AlertTriangle, Keyboard } from "lucide-react";
+import { Plus, ExternalLink, GripVertical, Trash2, Eye, RefreshCw, Settings, AlertTriangle, Keyboard, Archive } from "lucide-react";
 import { useKanbanStore, KanbanTask } from "@/stores/kanban";
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { TaskDetailModal } from "./TaskDetailModal";
 import { AddTaskModal } from "./AddTaskModal";
 import { ColumnManagementModal } from "./ColumnManagementModal";
 import { KanbanFilters } from "./KanbanFilters";
 import { BulkActionsToolbar } from "./BulkActionsToolbar";
-import { ArchiveView } from "./ArchiveView";
 import { githubAPIClient } from "@/lib/api/github-api-client";
 import { useAuthStore } from "@/stores/auth";
 import { toast } from "sonner";
@@ -247,7 +247,6 @@ export function KanbanBoard() {
     moveTask,
     syncFromGitHub,
     deleteTask,
-    showArchived,
     searchQuery,
     filterPriority,
     filterType,
@@ -258,6 +257,7 @@ export function KanbanBoard() {
     setShowAddTaskModal,
   } = useKanbanStore();
   const { orgData } = useAuthStore();
+  const router = useRouter();
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -292,7 +292,7 @@ export function KanbanBoard() {
       searchInput?.focus();
     },
     onArchive: () => {
-      useKanbanStore.getState().toggleShowArchived();
+      router.push("/dashboard/archive");
     },
     onHelp: showKeyboardShortcutsHelp,
   });
@@ -518,14 +518,6 @@ export function KanbanBoard() {
     setCloseOnGitHub(false);
   };
 
-  if (showArchived) {
-    return (
-      <div className="space-y-4">
-        <ArchiveView />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -538,6 +530,15 @@ export function KanbanBoard() {
             title="Keyboard shortcuts (?)"
           >
             <Keyboard className="w-4 h-4" />
+          </Button>
+          <Button
+            onClick={() => router.push("/dashboard/archive")}
+            variant="outline"
+            size="sm"
+            title="View archived tasks"
+          >
+            <Archive className="w-4 h-4 mr-2" />
+            Archive
           </Button>
           <Button
             onClick={handleAutoArchive}

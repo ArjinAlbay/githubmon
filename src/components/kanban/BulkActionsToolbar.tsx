@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useKanbanStore } from "@/stores/kanban";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import type { KanbanTask } from "@/stores/kanban";
 
 interface BulkActionsToolbarProps {
@@ -37,6 +38,7 @@ export function BulkActionsToolbar({
     columns,
     columnOrder,
   } = useKanbanStore();
+  const router = useRouter();
 
   if (selectedTaskIds.size === 0) return null;
 
@@ -46,6 +48,7 @@ export function BulkActionsToolbar({
       bulkArchive(Array.from(selectedTaskIds));
       onClearSelection();
       toast.success(`Archived ${count} task(s)`);
+      router.push("/dashboard/archive");
     }
   };
 
