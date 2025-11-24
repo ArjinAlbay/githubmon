@@ -10,7 +10,7 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { ThemeSelector } from "@/components/theme/ThemeToggle";
 import { GitHubSettingsForm } from "@/components/settings/GitHubSettingsForm";
 import { FavoritesSettings } from "@/components/settings/FavoritesSettings";
-import { Settings, Github, Palette, Star } from "lucide-react";
+import { Github, Palette, Star } from "lucide-react";
 
 export default function SettingsPage() {
   const { isLoading } = useRequireAuth();

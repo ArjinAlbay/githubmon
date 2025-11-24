@@ -10,7 +10,7 @@ import { QuickWinsTable } from "@/components/quick-wins/QuickWinsTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Lightbulb, Wrench } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { RateLimitWarning } from "@/components/common/RateLimitWarning";
 import { useQuickWinsFilters } from "@/hooks/useFilters";
 import { QuickWinsFiltersPanel } from "@/components/filters/QuickWinsFiltersPanel";
@@ -51,7 +51,7 @@ function QuickWinsContent() {
     }
   };
 
-  const applyFilters = (issues: GitHubIssue[]) => {
+  const applyFilters = useCallback((issues: GitHubIssue[]) => {
     return issues.filter((issue) => {
       if (filters.difficulty.length > 0 && !filters.difficulty.includes(issue.difficulty)) {
         return false;
@@ -75,10 +75,10 @@ function QuickWinsContent() {
 
       return true;
     });
-  };
+  }, [filters]);
 
-  const filteredGoodIssues = useMemo(() => applyFilters(goodIssues), [goodIssues, filters]);
-  const filteredEasyFixes = useMemo(() => applyFilters(easyFixes), [easyFixes, filters]);
+  const filteredGoodIssues = useMemo(() => applyFilters(goodIssues), [goodIssues, applyFilters]);
+  const filteredEasyFixes = useMemo(() => applyFilters(easyFixes), [easyFixes, applyFilters]);
 
   const availableFilterOptions = useMemo(() => {
     const allIssues = [...goodIssues, ...easyFixes];
@@ -107,9 +107,7 @@ function QuickWinsContent() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Lightbulb className="w-6 h-6 text-yellow-500" />
-            <span className="text-lg font-medium text-muted-foreground">
-              Easy opportunities to contribute and grow
-            </span>
+            <h1 className="text-lg font-medium text-muted-foreground">
               Quick Wins
             </h1>
           </div>

@@ -20,7 +20,7 @@ function parseNumberFilter(param: string | null): number | null {
   return isNaN(num) ? null : num;
 }
 
-function serializeFilters(filters: Record<string, any>): URLSearchParams {
+function serializeFilters(filters: ActionRequiredFilters | QuickWinsFilters): URLSearchParams {
   const params = new URLSearchParams();
 
   Object.entries(filters).forEach(([key, value]) => {

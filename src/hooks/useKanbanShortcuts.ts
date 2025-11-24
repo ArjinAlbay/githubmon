@@ -69,7 +69,7 @@ export function useKanbanShortcuts(handlers: ShortcutHandlers) {
       e.preventDefault();
       handlers.onHelp?.();
     }
-  }, [handlers]);
+  }, [handlers, setShowAddTaskModal]);
 
   useEffect(() => {
     // Attach multiple listeners for maximum coverage

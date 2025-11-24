@@ -6,8 +6,9 @@ import { AlertTriangle, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchSection } from "@/components/SearchSection";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
+import type { TrendingRepo, TopContributor } from "@/types/oss-insight";
 
 interface PageHeaderProps {
   title?: string;
@@ -17,7 +18,6 @@ interface PageHeaderProps {
 export function PageHeader({ title, description }: PageHeaderProps) {
   const { rateLimitInfo } = useDataCacheStore();
   const { goodIssues, easyFixes, fetchGoodIssues, fetchEasyFixes } = useQuickWinsStore();
-  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const totalQuickWins = goodIssues.length + easyFixes.length;
 
@@ -31,8 +31,7 @@ export function PageHeader({ title, description }: PageHeaderProps) {
     (rateLimitInfo.remaining === 0 ||
       (rateLimitInfo.remaining / rateLimitInfo.limit) * 100 < 10);
 
-  const handleSearchResults = (results: any[]) => {
-    setSearchResults(results);
+  const handleSearchResults = (results: (TrendingRepo | TopContributor)[]) => {
     // You can handle navigation to search page here if needed
     console.log("Search results:", results);
   };
