@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, Suspense, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -121,7 +121,6 @@ function SearchContent() {
   );
   const [loadingAnalytics, setLoadingAnalytics] = useState<boolean>(false);
   const [unifiedResult, setUnifiedResult] = useState<UnifiedSearchResult | null>(null);
-  const [showLegacyView, setShowLegacyView] = useState<boolean>(false);
 
   const loadUserAnalytics = useCallback(async () => {
     if (!userParam) return;
@@ -271,6 +270,69 @@ function SearchContent() {
     setCurrentSearchType,
     loadUserAnalytics,
   ]);
+
+  const actionableInsights = useMemo(() => {
+    if (
+      !userAnalytics?.behavior ||
+      !userAnalytics.languages ||
+      userAnalytics.behavior.length === 0
+    ) {
+      return [];
+    }
+
+    const busiestDay = userAnalytics.behavior.reduce(
+      (max, day) =>
+        day.commits + day.prs + day.issues >
+        max.commits + max.prs + max.issues
+          ? day
+          : max,
+      userAnalytics.behavior[0]
+    );
+
+    const topLanguage = [...userAnalytics.languages].sort(
+      (a, b) => b.value - a.value
+    )[0];
+
+    const totalActivity = userAnalytics.behavior.reduce(
+      (sum, day) => sum + day.commits + day.prs + day.issues,
+      0
+    );
+
+    const prForwardDays = userAnalytics.behavior.filter(
+      (day) => day.prs >= day.commits
+    ).length;
+
+    return [
+      {
+        title: "Best time to ask for reviews",
+        metric: busiestDay.day,
+        description: `Most activity happens on ${busiestDay.day}. Line up review requests then.`,
+      },
+      {
+        title: "Lead with their core stack",
+        metric: topLanguage?.name || "Multi-stack",
+        description: topLanguage
+          ? `They ship most in ${topLanguage.name}. Pitch PRs and issues in that stack.`
+          : "Work is spread across stacks — start with small, scoped tasks.",
+      },
+      {
+        title: "Weekly cadence",
+        metric: `${totalActivity} actions`,
+        description:
+          totalActivity >= 30
+            ? "High velocity — propose pairing or quick co-reviews."
+            : "Cadence is lighter — share low-friction wins first.",
+      },
+      {
+        title: "PR readiness",
+        metric: `${prForwardDays} review-heavy days`,
+        description:
+          prForwardDays > 2
+            ? "They touch PRs several days a week — send review asks instead of issues."
+            : "Prep starter issues to make it easy for them to engage.",
+      },
+    ];
+  }, [userAnalytics]);
   const performSearch = async (query: string, type: "users" | "repos") => {
     setSearchResults((prev) => ({ ...prev, loading: true, error: null }));
     setUnifiedResult(null);
@@ -361,21 +423,15 @@ function SearchContent() {
         )}
 
         {/* Polymorphic Search Results */}
-        {unifiedResult && !showLegacyView && !searchResults.loading && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
+        {unifiedResult && !searchResults.loading && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-2">
               <h1 className="text-2xl font-bold">
                 {isRepositoryResult(unifiedResult) && "Repository"}
                 {isUserResult(unifiedResult) && "User Profile"}
                 {isOrganizationResult(unifiedResult) && "Organization"}
               </h1>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowLegacyView(true)}
-              >
-                Show Legacy View
-              </Button>
+              <Badge variant="secondary">Actionable view</Badge>
             </div>
 
             {isRepositoryResult(unifiedResult) && (
@@ -390,11 +446,40 @@ function SearchContent() {
           </div>
         )}
 
+        {userParam && actionableInsights.length > 0 && (
+          <Card className="mt-6 border-dashed">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Action prompts
+                  </p>
+                  <h2 className="text-xl font-semibold">Make this profile actionable</h2>
+                </div>
+                <Badge variant="outline">Signals</Badge>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {actionableInsights.map((insight) => (
+                  <div
+                    key={insight.title}
+                    className="p-4 rounded-lg border bg-muted/40"
+                  >
+                    <p className="text-sm font-semibold mb-1">{insight.title}</p>
+                    <p className="text-lg font-bold">{insight.metric}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {insight.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* User Results with Analytics */}
         {userParam &&
           searchResults.users.length > 0 &&
-          !searchResults.loading &&
-          (showLegacyView || !unifiedResult) && (
+          !searchResults.loading && (
             <div className="space-y-8">
               {/* User Profile Section */}
               <div></div>
@@ -990,7 +1075,7 @@ function SearchContent() {
         {repoParam &&
           searchResults.repos.length > 0 &&
           !searchResults.loading &&
-          (showLegacyView || !unifiedResult) && (
+          !unifiedResult && (
             <div>
               <div className="flex items-center mb-6">
                 <Package className="w-6 h-6 mr-2" />

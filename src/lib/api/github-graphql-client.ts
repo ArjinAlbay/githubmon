@@ -1022,7 +1022,7 @@ class GitHubGraphQLClient {
     }
 
     const query = `
-      query GetRepoMetrics($owner: String!, $name: String!) {
+      query GetRepoMetrics($owner: String!, $name: String!, $since: DateTime!) {
         repository(owner: $owner, name: $name) {
           nameWithOwner
           description
@@ -1103,7 +1103,7 @@ class GitHubGraphQLClient {
 
   async getUserMetrics(username: string): Promise<UserMetrics | null> {
     const query = `
-      query GetUserMetrics($username: String!, $since: GitTimestamp!) {
+      query GetUserMetrics($username: String!, $since: DateTime!) {
         user(login: $username) {
           login
           avatarUrl
@@ -1209,7 +1209,7 @@ class GitHubGraphQLClient {
     const dateString = oneDayAgo.toISOString().split("T")[0];
 
     const query = `
-      query GetTopContributors($searchQuery: String!, $limit: Int!) {
+      query GetTopContributors($searchQuery: String!, $limit: Int!, $since: DateTime!) {
         search(query: $searchQuery, type: USER, first: $limit) {
           nodes {
             ... on User {
@@ -1266,44 +1266,46 @@ class GitHubGraphQLClient {
         rateLimit: RateLimit;
       }>(query, { searchQuery, limit, since });
 
-      return result.data.search.nodes.map((user) => {
-        const repositories = user.repositories.nodes || [];
-        const totalStars = repositories.reduce(
-          (sum, repo) => sum + (repo.stargazerCount || 0),
-          0
-        );
+      return result.data.search.nodes
+        .filter((user) => user && user.repositories && user.contributionsCollection)
+        .map((user) => {
+          const repositories = user.repositories.nodes || [];
+          const totalStars = repositories.reduce(
+            (sum, repo) => sum + (repo.stargazerCount || 0),
+            0
+          );
 
-        const languageCounts: Record<string, number> = {};
-        repositories.forEach((repo) => {
-          const lang = repo.primaryLanguage?.name;
-          if (lang) {
-            languageCounts[lang] = (languageCounts[lang] || 0) + 1;
-          }
+          const languageCounts: Record<string, number> = {};
+          repositories.forEach((repo) => {
+            const lang = repo.primaryLanguage?.name;
+            if (lang) {
+              languageCounts[lang] = (languageCounts[lang] || 0) + 1;
+            }
+          });
+
+          const topLanguages = Object.entries(languageCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([lang]) => lang);
+
+          return {
+            login: user.login,
+            name: user.name || undefined,
+            avatar_url: user.avatarUrl,
+            html_url: user.url,
+            contributions: user.contributionsCollection.contributionCalendar.totalContributions,
+            repos_count: user.repositories.totalCount,
+            stars_earned: totalStars,
+            followers_count: user.followers.totalCount,
+            languages: topLanguages,
+            type: "User" as const,
+            bio: user.bio || "",
+            location: user.location || undefined,
+            company: user.company || undefined,
+            rank: 0,
+            rank_change: 0,
+          };
         });
-
-        const topLanguages = Object.entries(languageCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([lang]) => lang);
-
-        return {
-          login: user.login,
-          name: user.name || undefined,
-          avatar_url: user.avatarUrl,
-          html_url: user.url,
-          contributions: user.contributionsCollection.contributionCalendar.totalContributions,
-          repos_count: user.repositories.totalCount,
-          stars_earned: totalStars,
-          followers_count: user.followers.totalCount,
-          languages: topLanguages,
-          type: "User" as const,
-          bio: user.bio || "",
-          location: user.location || undefined,
-          company: user.company || undefined,
-          rank: 0,
-          rank_change: 0,
-        };
-      });
     } catch (error) {
       console.error("Failed to fetch top contributors:", error);
       return [];
